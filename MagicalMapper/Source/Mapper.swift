@@ -117,12 +117,15 @@ public class Mapper {
     /*
      *  Adds key-to-property mapping for a class
      */
-    public func addMapping<T: NSManagedObject>(type: T.Type, mapping: [String : String]) {
+    public func addMappingForEntity<T: NSManagedObject>(type: T.Type, mapping: [String : String]) {
         mappingDictionary[(NSStringFromClass(type).pathExtension)] = mapping;
     }
     
     // MARK: - Subscripts -
     
+    /*
+     *  Subscript used for setting/getting mapping based on a given entity
+     */
     subscript (type: NSManagedObject.Type) -> Dictionary<String, String>? {
         get {
             return mappingDictionary[NSStringFromClass(type).pathExtension]
@@ -225,7 +228,11 @@ public class Mapper {
             }
         }
         
-        // TODO: look for existing managedObject, and perform upsert based on UpsertPolicy
+        if let existingManagedObject = existingManagedObject(managedObject) {
+            self.updateManagedObject(existingManagedObject, withManagedObject: managedObject)
+            self.workingManagedObjectContext.deleteObject(managedObject)
+            return existingManagedObject
+        }
         
         return managedObject
     }
@@ -311,7 +318,7 @@ public class Mapper {
      *  Finds and returns and existing managedObject based on provided unique identifiers for entity
      *  Returns nil if either 0 or more than 1 record were found
      */
-    private func getExistingManagedObject(managedObject: NSManagedObject) -> NSManagedObject? {
+    private func existingManagedObject(managedObject: NSManagedObject) -> NSManagedObject? {
         var predicateKeys = uniqueIdentifierDictionary[managedObject.entity.name]
         
         if let keys = predicateKeys {
@@ -349,8 +356,13 @@ public class Mapper {
         return nil
     }
     
+    /*
+     *  Updates attributes of a given managed object based on another
+     */
     private func updateManagedObject(managedObject: NSManagedObject, withManagedObject: NSManagedObject) {
-        
+        for propertyDescription in managedObject.entity.properties {
+            managedObject.setValue(withManagedObject.valueForKey(propertyDescription.name), forKey: propertyDescription.name)
+        }
     }
     
 }

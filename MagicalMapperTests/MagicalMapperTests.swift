@@ -166,6 +166,66 @@ class MapperTests: XCTestCase {
         XCTAssert(user.posts.count == 1, "Pass")
     }
     
+    func testShouldUpdateExistingManagedObjectBasedOnASinleUniqueIdentifier() {
+        var userDict = [String : AnyObject]()
+        userDict["firstName"] = firstName
+        userDict["id"] = 5
+        
+        var user = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        mapper!.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
+        let newName = "Completely random name"
+        userDict["firstName"] = newName
+        var newUser = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        XCTAssert(newUser.objectID == user.objectID, "Pass")
+        XCTAssert(newUser.firstName == newName, "Pass")
+    }
+    
+    func testShouldNotUpdateExistingManagedObjectWhenUniqueIdentifiersAreDifferent() {
+        var userDict = [String : AnyObject]()
+        userDict["firstName"] = firstName
+        userDict["id"] = 5
+        
+        var user = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        mapper!.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
+        let newName = "Completely random name"
+        userDict["firstName"] = newName
+        userDict["id"] = 6
+        var newUser = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        XCTAssert(newUser.objectID != user.objectID, "Pass")
+        XCTAssert(newUser.firstName != user.firstName, "Pass")
+    }
+    
+    func testShouldUpdateExistingRelationManagedObjectBasedOnASinleUniqueIdentifier() {
+        var userDict = [String : AnyObject]()
+        let addressId = 8
+        userDict["id"] = 5
+        userDict["address"] = [
+            "id" : addressId,
+            "city" : city]
+        
+        var user = mapper!.mapDictionary(userDict, toType: User.self)
+        // 1 to many relationship between address and user causes address to be nolified
+        // So in order to do the test we need to keep a referebce to address here
+        var initialAddress = user.address;
+        
+        mapper!.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
+        mapper!.addUniqueIdentifiersForEntity(Address.self, identifiers: "id")
+        let newCity = "Completely random city"
+        userDict["id"] = 6
+        userDict["address"] = [
+            "id" : addressId,
+            "city" : newCity]
+        var newUser = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        XCTAssert(newUser.objectID != user.objectID, "Pass")
+        XCTAssert(newUser.address.objectID == initialAddress.objectID, "Pass")
+        XCTAssert(newUser.address.city == newCity, "Pass")
+    }
+    
     func testPerformanceWith10UsersWith10PostsPerUserWithoutCustomMapping() {
         
         var userDict = [String : AnyObject]()
@@ -248,6 +308,10 @@ class MapperTests: XCTestCase {
             "i"             : "id",
             "titl"          : "title",
             "bod"           : "body"]
+        
+        mapper!.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
+        mapper!.addUniqueIdentifiersForEntity(Address.self, identifiers: "id")
+        mapper!.addUniqueIdentifiersForEntity(Post.self, identifiers: "id")
         
         self.measureBlock() {
             self.mapper!.mapDictionaries(userDicts, toType: User.self)

@@ -81,7 +81,7 @@ var arrayOfUsers = mapper.mapDictionaries(arrayOfUserDictionaries, toType: User.
 
 Custom Mapping
 ---------
-What if the key values comeing back from the server doesn't match our models? Well we can write custom mapping. Mapping doesn't need to be provided for all key values. let's say the server sends the key "location" instead of "address".
+What if the key values comeing back from the server don't match our models? Well we can write custom mapping. let's say the server sends the key "location" instead of "address".
 ```Swift
 mapper[User.self] = [
     "location"      : "address",
@@ -115,9 +115,9 @@ Insert & Update
 
 What if we don't want to add a duplicate record everything mapping is performed? Well there is a solution for that too.
 ```Swift
-mapper.addUniqueIdentifiersForEntity(User.self, identifiers: ["id"])
-mapper.addUniqueIdentifiersForEntity(Address.self, identifiers: ["id"])
-mapper.addUniqueIdentifiersForEntity(Post.self, identifiers: ["id", "ANOTHER_KEY"])
+mapper.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
+mapper.addUniqueIdentifiersForEntity(Address.self, identifiers: "id")
+mapper.addUniqueIdentifiersForEntity(Post.self, identifiers: "id", "ANOTHER_KEY")
 ```
 You can pass an array of property names to uniquely identify each record, and MagicalMapper uses these keys to decide whether it should insert a new record or update an existing record. 
 

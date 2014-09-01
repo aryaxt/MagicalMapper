@@ -55,7 +55,7 @@ public enum UpsertPolicy {
     case PurgeExistingRecord
 }
 
-public class Mapper {
+public class MagicalMapper {
     
     // MARK: - Initialization -
     
@@ -66,7 +66,7 @@ public class Mapper {
     private final let managedObjectContext: NSManagedObjectContext
     private final let workingManagedObjectContext: NSManagedObjectContext
     
-    init(managedObjectContext: NSManagedObjectContext) {
+    public init(managedObjectContext: NSManagedObjectContext) {
         self.managedObjectContext = managedObjectContext;
         self.workingManagedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
         self.workingManagedObjectContext.parentContext = managedObjectContext
@@ -126,7 +126,7 @@ public class Mapper {
     /*
      *  Subscript used for setting/getting mapping based on a given entity
      */
-    subscript (type: NSManagedObject.Type) -> Dictionary<String, String>? {
+    public subscript (type: NSManagedObject.Type) -> Dictionary<String, String>? {
         get {
             return mappingDictionary[NSStringFromClass(type).pathExtension]
         }

@@ -1,13 +1,12 @@
 //
 //  AppDelegate.swift
-//  MagicalMapper
+//  Example
 //
 //  Created by Aryan on 8/31/14.
 //  Copyright (c) 2014 aryaxt. All rights reserved.
 //
 
 import UIKit
-import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,37 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(application: UIApplication!, didFinishLaunchingWithOptions launchOptions: NSDictionary!) -> Bool {
-        
-        var addressDict = [String: AnyObject]()
-        addressDict["city"] = "San Francisco"
-        addressDict["country"] = "USA"
-        
-        var userDict = [String : AnyObject]()
-        userDict["first__name"] = "Aryan"
-        userDict["lastName"] = "Gh"
-        userDict["createdAt"] = "05/05/1986"
-        userDict["age"] = 12
-        userDict["address"] = addressDict
-        
-        var post1Dict = [String: AnyObject]()
-        post1Dict["id"] = 1
-        post1Dict["title"] = "Title"
-        post1Dict["title"] = "Body"
-        
-        var post2Dict = [String: AnyObject]()
-        post2Dict["id"] = 2
-        post2Dict["title"] = "Title 2"
-        post2Dict["title"] = "Body 2"
-        
-        userDict["posts"] = [post1Dict, post2Dict]
-        
-        
-        var mapper = Mapper(managedObjectContext: CoreDataManager.sharedInstance.managedObjectContext!)
-        mapper[User.self] = ["first__name" : "firstName"]
-        var user = mapper.mapDictionary(userDict, toType: User.self)
-        
-        println(user)
-        
         // Override point for customization after application launch.
         return true
     }

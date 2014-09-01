@@ -31,7 +31,7 @@ import CoreData
 
 class MapperTests: XCTestCase {
     
-    var mapper: Mapper?
+    var mapper: MagicalMapper?
     let firstName = "Aryan"
     let lastName = "Ghassemi"
     let age = 27
@@ -45,7 +45,7 @@ class MapperTests: XCTestCase {
     
     override func setUp() {
         CoreDataManager.sharedInstance.reset()
-        mapper = Mapper(managedObjectContext: CoreDataManager.sharedInstance.managedObjectContext!)
+        mapper = MagicalMapper(managedObjectContext: CoreDataManager.sharedInstance.managedObjectContext!)
         super.setUp()
     }
     
@@ -324,6 +324,6 @@ class MapperTests: XCTestCase {
     func defaultDate() -> NSDate {
         var dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
-        return dateFormatter.dateFromString(createdAt)
+        return dateFormatter.dateFromString(createdAt)!
     }
 }

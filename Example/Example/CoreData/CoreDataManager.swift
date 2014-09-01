@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-public class CoreDataManager {
+public class CoreDataManager :  NSObject {
     
     class var sharedInstance : CoreDataManager {
         struct Static {

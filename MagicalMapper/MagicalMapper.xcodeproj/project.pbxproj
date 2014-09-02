@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		920BFB0919B55DDE00B80842 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920BFB0819B55DDE00B80842 /* Logger.swift */; };
+		920BFB0A19B55DDE00B80842 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920BFB0819B55DDE00B80842 /* Logger.swift */; };
 		92635A6E19B3CC8900C3841A /* MagicalMapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 92635A6D19B3CC8900C3841A /* MagicalMapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		92635AAF19B3CD7F00C3841A /* MagicalMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AAE19B3CD7F00C3841A /* MagicalMapper.swift */; };
 		92635ABA19B3CDC100C3841A /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AB519B3CDC100C3841A /* Address.swift */; };
@@ -19,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		920BFB0819B55DDE00B80842 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		92635A6819B3CC8900C3841A /* MagicalMapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MagicalMapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		92635A6C19B3CC8900C3841A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92635A6D19B3CC8900C3841A /* MagicalMapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MagicalMapper.h; sourceTree = "<group>"; };
@@ -108,6 +111,7 @@
 		92635AAD19B3CD7F00C3841A /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				920BFB0819B55DDE00B80842 /* Logger.swift */,
 				92635AAE19B3CD7F00C3841A /* MagicalMapper.swift */,
 			);
 			path = Source;
@@ -240,6 +244,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92635AAF19B3CD7F00C3841A /* MagicalMapper.swift in Sources */,
+				920BFB0919B55DDE00B80842 /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,6 +259,7 @@
 				92635ABA19B3CDC100C3841A /* Address.swift in Sources */,
 				92635ABB19B3CDC100C3841A /* Post.swift in Sources */,
 				92635ABE19B3CDE100C3841A /* MagicalMapperTests.swift in Sources */,
+				920BFB0A19B55DDE00B80842 /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -55,6 +55,13 @@ public enum UpsertPolicy {
     case PurgeExistingRecord
 }
 
+public enum LogLevel : Int {
+    case Info = 0
+    case Warning
+    case Error
+    case None
+}
+
 public class MagicalMapper {
     
     // MARK: - Initialization -
@@ -64,12 +71,15 @@ public class MagicalMapper {
     private final var dateFormatters = [NSDateFormatter]()
     private final var mappingDictionary = [String : [String : String]]() //[Entity : [Key : Property]]
     private final let managedObjectContext: NSManagedObjectContext
-    private final let workingManagedObjectContext: NSManagedObjectContext
+    //private final let workingManagedObjectContext: NSManagedObjectContext
+    private final let logger: Logger
     
     public init(managedObjectContext: NSManagedObjectContext) {
         self.managedObjectContext = managedObjectContext;
-        self.workingManagedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        self.workingManagedObjectContext.parentContext = managedObjectContext
+        //self.workingManagedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        //self.workingManagedObjectContext.parentContext = managedObjectContext
+        
+        self.logger = Logger(logLevel: .Warning)
         
         addDefaultDateFormatters()
     }
@@ -77,36 +87,45 @@ public class MagicalMapper {
     // MARK: - Public Methods -
     
     /*
-     *  Takes a dictionary and a MetaType and generates and returns managed objects
-     */
+    *  Takes a dictionary and a MetaType and generates and returns managed objects
+    */
     public func mapDictionary <T: NSManagedObject>(dictionary: SourceDictionary, toType: T.Type) -> T {
         let entityName = NSStringFromClass(toType).pathExtension
-        return generateManagedObjectFromDictionary(dictionary, entityName: entityName) as T
-    }
-    
-    /*
-     *  Takes a dictionary and a MetaType and generates and returns managed objects
-     */
-    public func mapDictionaries <T: NSManagedObject>(dictionaries: [SourceDictionary], toType: T.Type) -> [T] {
-        var result = [T]()
+        var result = generateManagedObjectFromDictionary(dictionary, entityName: entityName) as T
         
-        for dictionary in dictionaries {
-            result.append(mapDictionary(dictionary, toType: toType))
-        }
+        saveContext()
         
         return result
     }
     
     /*
-     *  Adds a dateformatter to be used for string to date conversion
-     */
+    *  Takes a dictionary and a MetaType and generates and returns managed objects
+    */
+    public func mapDictionaries <T: NSManagedObject>(dictionaries: [SourceDictionary], toType: T.Type) -> [T] {
+        var result = [T]()
+        let entityName = NSStringFromClass(toType).pathExtension
+        
+        for dictionary in dictionaries {
+            // Don't call mapDictionary because that saves context
+            // We don't want to save the context every time we create a managed object
+            result.append(generateManagedObjectFromDictionary(dictionary, entityName: entityName) as T)
+        }
+        
+        saveContext()
+        
+        return result
+    }
+    
+    /*
+    *  Adds a dateformatter to be used for string to date conversion
+    */
     public func addDateFormatter(dateFormatter: NSDateFormatter) {
         dateFormatters.insert(dateFormatter, atIndex: 0)
     }
     
     /*
-     *  Adds Unique identifiers for an entity, and uses these identifiers to determine whether it should insert or upsert
-     */
+    *  Adds Unique identifiers for an entity, and uses these identifiers to determine whether it should insert or upsert
+    */
     public func addUniqueIdentifiersForEntity<T: NSManagedObject>(type: T.Type, identifiers: String...) {
         let entityName = NSStringFromClass(type).pathExtension
         validateEntityMapping(entityName, propertyNames: identifiers)
@@ -115,8 +134,8 @@ public class MagicalMapper {
     }
     
     /*
-     *  Adds key-to-property mapping for a class
-     */
+    *  Adds key-to-property mapping for a class
+    */
     public func addMappingForEntity<T: NSManagedObject>(type: T.Type, mapping: [String : String]) {
         mappingDictionary[(NSStringFromClass(type).pathExtension)] = mapping;
     }
@@ -124,8 +143,8 @@ public class MagicalMapper {
     // MARK: - Subscripts -
     
     /*
-     *  Subscript used for setting/getting mapping based on a given entity
-     */
+    *  Subscript used for setting/getting mapping based on a given entity
+    */
     public subscript (type: NSManagedObject.Type) -> Dictionary<String, String>? {
         get {
             return mappingDictionary[NSStringFromClass(type).pathExtension]
@@ -136,11 +155,15 @@ public class MagicalMapper {
         }
     }
     
+    public func setLogLevel(logLevel: LogLevel) {
+        logger.logLevel = logLevel
+    }
+    
     // MARK: - Private Methods -
     
     /*
-     *  Validates existance of property names for a given entity
-     */
+    *  Validates existance of property names for a given entity
+    */
     private func validateEntityMapping(entityName: String, propertyNames: [String]) {
         var entityPropertyNames = propertyNamesFromEntity(entityName)
         
@@ -155,11 +178,11 @@ public class MagicalMapper {
     }
     
     /*
-     *  Returns a list of property names given an entity name
-     */
+    *  Returns a list of property names given an entity name
+    */
     private func propertyNamesFromEntity(entityName: String)  -> [String] {
         var propertyNames = [String]();
-        var entityDescription = NSEntityDescription.entityForName(entityName, inManagedObjectContext: workingManagedObjectContext)
+        var entityDescription = NSEntityDescription.entityForName(entityName, inManagedObjectContext: managedObjectContext)
         
         for propertyDescription in entityDescription.properties {
             propertyNames.append(propertyDescription.name)
@@ -169,11 +192,74 @@ public class MagicalMapper {
     }
     
     /*
-     *  Creates and populates a managed object given an entity name and a source dictionart
-     */
+    *  Based on unique identifiers and dictionary source it attempts to find an existing managed object
+    *  If object not found it instantiates a new one and returns it
+    */
+    private func newOrExistingManagedObject(entityName: String, sourceDictionary: SourceDictionary) -> NSManagedObject {
+        
+        func retunNewManagedObject() -> NSManagedObject {
+            return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: managedObjectContext) as NSManagedObject
+        }
+        
+        var predicateKeys = uniqueIdentifierDictionary[entityName]
+        if (predicateKeys == nil) {
+            return retunNewManagedObject()
+        }
+        
+        var mapping = mappingDictionary[entityName]
+        
+        if let keys = predicateKeys {
+            var predicates = [NSPredicate]()
+            
+            for key in keys {
+                var sourceKey = mapping?[key] ||= key
+                
+                if let sourceValeToBeUsedAsPredicateValue: AnyObject = sourceDictionary[sourceKey] {
+                    // TODO: Get entity description. If it's a date convert string to date before creating predicate
+                    var predicate = NSPredicate(format: "%K = %@", argumentArray: [sourceKey, sourceValeToBeUsedAsPredicateValue])
+                    predicates.append(predicate)
+                }
+                else {
+                    logger.logError("UniqueIdentifier is not included in the source dictionary for key '\(sourceKey)' for entity '\(entityName)'")
+                    return retunNewManagedObject()
+                }
+            }
+            
+            var compundPredicate = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
+            var fetchRequest = NSFetchRequest(entityName: entityName)
+            fetchRequest.predicate = compundPredicate
+            
+            var error: NSError?
+            var existingObjects = managedObjectContext.executeFetchRequest(fetchRequest, error: &error)
+            
+            if let anError = error {
+                logger.logError(anError.localizedDescription)
+            }
+            else {
+                if (existingObjects.count == 1) {
+                    return existingObjects.first as NSManagedObject
+                }
+                else if (existingObjects.count > 1) {
+                    logger.logError("Multiple records with the same key were found \(compundPredicate)")
+                    
+                }
+            }
+            // TODO: Handle NSNull values in dictionary
+        }
+        
+        return retunNewManagedObject()
+    }
+    
+    /*
+    *  Creates and populates a managed object given an entity name and a source dictionart
+    */
     private func generateManagedObjectFromDictionary(dictionary: SourceDictionary, entityName: String) -> NSManagedObject {
         
-        let managedObject = getNewManagedObject(entityName)
+        let managedObject = newOrExistingManagedObject(entityName, sourceDictionary: dictionary)
+        
+        logger.logInfo("")
+        logger.logInfo("====> Start mapping entity: '\(entityName)'")
+        logger.logInfo("")
         
         for (key, value) in dictionary {
             autoreleasepool {
@@ -181,28 +267,41 @@ public class MagicalMapper {
                 let entityMapping = self.mappingDictionary[entityName]
                 let propertyToMap = entityMapping?[key] ||= key
                 
+                if (!managedObject.respondsToSelector(Selector(propertyToMap))) {
+                    self.logger.logWarning("Entity '\(entityName)' doesn't have a property named '\(propertyToMap)'")
+                    // continue
+                    // TODO: find out why continue gives compile error
+                }
+                
                 // Handle Dictionary
                 if let dictionaryValue = value as? SourceDictionary {
                     var relationshipDescription = self.relationshipDescriptionForProperty(propertyToMap, managedObject: managedObject)
                     
-                    // If entity is found based on key
+                    // If relationshipDescription is found
                     if let relationship = relationshipDescription {
+                        self.logger.logInfo("Mapping nested managedobject : '\(key)' to '\(propertyToMap)' for entity '\(entityName)'")
+                        
                         var nestedManagedObject = self.generateManagedObjectFromDictionary(dictionaryValue, entityName: relationship.destinationEntity.name)
+                        
+                        // TODO: What if there is already a managed object assigned, do we delete? What do we do?
                         managedObject.setValue(nestedManagedObject, forKey: propertyToMap)
                     }
+                    else {
+                        self.logger.logError("Unable to map dictionary to key '\(propertyToMap)' for Entity '\(entityName)'. Property may not be a relationship property")
+                    }
                 }
-                // Handle Array
+                    // Handle Array
                 else if let arrayValue = value as? Array<AnyObject> {
                     var relationshipDescription = self.relationshipDescriptionForProperty(propertyToMap, managedObject: managedObject)
                     
                     if let relationship = relationshipDescription {
+                        self.logger.logInfo("Mapping Array : '\(key)' to '\(propertyToMap)' for entity \(entityName)")
+                        
                         var managedObjects = [NSManagedObject]()
                         
                         for dictionary in arrayValue {
-                            autoreleasepool {
-                                var nestedManagedObject = self.generateManagedObjectFromDictionary(dictionary as SourceDictionary, entityName: relationship.destinationEntity.name)
-                                managedObjects.append(nestedManagedObject)
-                            }
+                            var nestedManagedObject = self.generateManagedObjectFromDictionary(dictionary as SourceDictionary, entityName: relationship.destinationEntity.name)
+                            managedObjects.append(nestedManagedObject)
                         }
                         
                         var managedObjectSet = relationship.ordered
@@ -211,11 +310,15 @@ public class MagicalMapper {
                         
                         managedObject.setValue(managedObjectSet, forKey: propertyToMap)
                     }
+                    else {
+                        self.logger.logError("Unable to map array to key '\(propertyToMap)' for Entity '\(entityName)'. Property may not be a relationship property")
+                    }
                 }
                     // Handle everything else
                 else {
+                    self.logger.logInfo("Mapping Field : '\(key)' to '\(propertyToMap)' for entity \(entityName)")
+                    
                     if let attributeDescription = self.attributeDescriptionForProperty(propertyToMap, managedObject: managedObject){
-                        // If attribute is date convert before setting value
                         if (attributeDescription.attributeType == .DateAttributeType) {
                             managedObject.setValue(self.dateFromString(value as String), forKey: propertyToMap);
                         }
@@ -228,18 +331,12 @@ public class MagicalMapper {
             }
         }
         
-        if let existingManagedObject = existingManagedObject(managedObject) {
-            self.updateManagedObject(existingManagedObject, withManagedObject: managedObject)
-            self.workingManagedObjectContext.deleteObject(managedObject)
-            return existingManagedObject
-        }
-        
         return managedObject
     }
     
     /*
-     *  Returns an NSAttributeType given a managedObject and property name
-     */
+    *  Returns an NSAttributeType given a managedObject and property name
+    */
     private func attributeDescriptionForProperty(property: String, managedObject: NSManagedObject) -> NSAttributeDescription? {
         for propertyDescription in managedObject.entity.properties {
             if (propertyDescription.name == property) {
@@ -247,7 +344,7 @@ public class MagicalMapper {
                 if let attributeDescription = propertyDescription as? NSAttributeDescription {
                     return attributeDescription
                 }
-                else if let relationshipDescription = propertyDescription as? NSRelationshipDescription {
+                else {
                     return nil
                 }
             }
@@ -257,8 +354,8 @@ public class MagicalMapper {
     }
     
     /*
-     *  Returns an NSRelationshipDescription given a managedObject and property name
-     */
+    *  Returns an NSRelationshipDescription given a managedObject and property name
+    */
     private func relationshipDescriptionForProperty(property: String, managedObject: NSManagedObject) -> NSRelationshipDescription? {
         for propertyDescription in managedObject.entity.properties {
             if (propertyDescription.name == property) {
@@ -276,8 +373,8 @@ public class MagicalMapper {
     }
     
     /*
-     *  Attempts to convert string to date using dateformatters
-     */
+    *  Attempts to convert string to date using dateformatters
+    */
     private func dateFromString(dateString: String) -> NSDate? {
         for dateFormatter in dateFormatters {
             if let date = dateFormatter.dateFromString(dateString) {
@@ -287,12 +384,12 @@ public class MagicalMapper {
         
         return nil
     }
-
+    
     /*
-     *  Adding default date formatters to be used for date conversion
-     */
+    *  Adding default date formatters to be used for date conversion
+    */
     private func addDefaultDateFormatters() {
-
+        
         func addWithFormat(format: String) {
             var formatter = NSDateFormatter()
             formatter.dateFormat = format
@@ -308,16 +405,9 @@ public class MagicalMapper {
     }
     
     /*
-     *  Returns a new instance of NSManagedObject given an entity name
-     */
-    private func getNewManagedObject(entityName: String) -> NSManagedObject {
-        return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: workingManagedObjectContext) as NSManagedObject
-    }
-    
-    /*
-     *  Finds and returns and existing managedObject based on provided unique identifiers for entity
-     *  Returns nil if either 0 or more than 1 record were found
-     */
+    *  Finds and returns and existing managedObject based on provided unique identifiers for entity
+    *  Returns nil if either 0 or more than 1 record were found
+    */
     private func existingManagedObject(managedObject: NSManagedObject) -> NSManagedObject? {
         var predicateKeys = uniqueIdentifierDictionary[managedObject.entity.name]
         
@@ -334,7 +424,7 @@ public class MagicalMapper {
             fetchRequest.predicate = compundPredicate
             
             var error: NSError?
-            var existingObjects = workingManagedObjectContext.executeFetchRequest(fetchRequest, error: &error)
+            var existingObjects = managedObjectContext.executeFetchRequest(fetchRequest, error: &error)
             
             if let anError = error {
                 println("Fix this error")
@@ -357,11 +447,14 @@ public class MagicalMapper {
     }
     
     /*
-     *  Updates attributes of a given managed object based on another
-     */
-    private func updateManagedObject(managedObject: NSManagedObject, withManagedObject: NSManagedObject) {
-        for propertyDescription in managedObject.entity.properties {
-            managedObject.setValue(withManagedObject.valueForKey(propertyDescription.name), forKey: propertyDescription.name)
+    *  Saves changes to both working context and main managed context
+    */
+    private func saveContext() {
+        managedObjectContext.performBlock {
+            var error : NSError?
+            if !self.managedObjectContext.save(&error) {
+                println(error)
+            }
         }
     }
     

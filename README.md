@@ -119,6 +119,6 @@ mapper.addUniqueIdentifiersForEntity(User.self, identifiers: "id")
 mapper.addUniqueIdentifiersForEntity(Address.self, identifiers: "id")
 mapper.addUniqueIdentifiersForEntity(Post.self, identifiers: "id", "ANOTHER_KEY")
 ```
-You can pass an array of property names to uniquely identify each record, and MagicalMapper uses these keys to decide whether it should insert a new record or update an existing record. 
+You can pass an array of property names to uniquely identify each record, and MagicalMapper uses these keys to decide whether it should insert a new record or update an existing record. Supperted property types to be used as unique identifiers are Stirng, Int, NSDate.
 
 

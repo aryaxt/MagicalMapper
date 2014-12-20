@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 aryaxt. All rights reserved.
 //
 
-class Logger {
+public class Logger {
     
     var logLevel: LogLevel
     
@@ -27,7 +27,7 @@ class Logger {
     }
     
     func log(message: String, level: LogLevel) {
-        if (level.toRaw() >= self.logLevel.toRaw()) {
+        if (level.rawValue >= self.logLevel.rawValue) {
             println(message)
         }
     }

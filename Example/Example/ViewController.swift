@@ -20,38 +20,37 @@ class ViewController: UIViewController, UITableViewDataSource, NSFetchedResultsC
         var moc = CoreDataManager.sharedInstance.managedObjectContext;
         var fetchRequest = NSFetchRequest(entityName: "Repository")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: "Root")
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: moc!, sectionNameKeyPath: nil, cacheName: "Root")
         fetchedResultsController!.delegate = self
         fetchedResultsController?.performFetch(nil)
         
         self.table?.reloadData()
         
-        AlamofireAndMagicalMapperClient.sharedInstance.fetchObjects(
-            Method.GET,
-            url: "https://api.github.com/users/aryaxt/repos?type=owner&per_page=25&sort=updated",
-            type: Repository.self) { (results, error) -> () in
-                
-                println(results)
+        var client = AlamofireAndMagicalMapperClient.sharedInstance
+        
+        client.fetchObjects(.GET, url: "https://api.github.com/users/aryaxt/repos?type=owner&per_page=25&sort=updated", type: Repository.self) {
+            println("Results: \($0)")
         }
     }
     
-    func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell! {
-        var repository: Repository = fetchedResultsController?.fetchedObjects[indexPath.row] as Repository
-        var cell: UITableViewCell = tableView.dequeueReusableCellWithIdentifier("repositoryCell") as UITableViewCell
-        cell.textLabel.text = repository.name
-        cell.detailTextLabel.text = "Owner: \(repository.owner.username)\n" +
-            "Created At: \(repository.createdAt)\n" +
-        "Open Issues: \(repository.openIssuesCount)"
-        
-        return cell
-    }
-    
-    func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int {
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let count =  fetchedResultsController?.fetchedObjects?.count {
             return count
         }
         
         return 0
+    }
+    
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        var repository: Repository = fetchedResultsController!.fetchedObjects![indexPath.row] as Repository
+        var cell: UITableViewCell = tableView.dequeueReusableCellWithIdentifier("repositoryCell") as UITableViewCell
+        cell.textLabel.text = repository.name
+        cell.detailTextLabel!.text = "Owner: \(repository.owner.username)\n" +
+            "Created At: \(repository.createdAt)\n" +
+        "Open Issues: \(repository.openIssuesCount)"
+        
+        return cell
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController!) {

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		924758FF1A460C74009AA4E0 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924758FE1A460C74009AA4E0 /* Alamofire.swift */; };
+		924759011A460EF0009AA4E0 /* MagicalMapper.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 924759001A460EF0009AA4E0 /* MagicalMapper.framework */; };
 		92635A9019B3CCAE00C3841A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635A8F19B3CCAE00C3841A /* AppDelegate.swift */; };
 		92635A9219B3CCAE00C3841A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635A9119B3CCAE00C3841A /* ViewController.swift */; };
 		92635A9519B3CCAE00C3841A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 92635A9319B3CCAE00C3841A /* Main.storyboard */; };
@@ -16,7 +18,6 @@
 		92635AE419B3E90900C3841A /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 92635ADF19B3E90900C3841A /* Model.xcdatamodeld */; };
 		92635AE519B3E90900C3841A /* Owner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AE119B3E90900C3841A /* Owner.swift */; };
 		92635AE619B3E90900C3841A /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AE219B3E90900C3841A /* Repository.swift */; };
-		92635AEB19B3E96500C3841A /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AE919B3E96500C3841A /* Alamofire.swift */; };
 		92635AEC19B3E96500C3841A /* AlamofireAndMagicalMapperClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92635AEA19B3E96500C3841A /* AlamofireAndMagicalMapperClient.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		924758FE1A460C74009AA4E0 /* Alamofire.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alamofire.swift; sourceTree = "<group>"; };
+		924759001A460EF0009AA4E0 /* MagicalMapper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MagicalMapper.framework; path = "../MagicalMapper/build/Debug-iphoneos/MagicalMapper.framework"; sourceTree = "<group>"; };
 		92635A8A19B3CCAE00C3841A /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92635A8E19B3CCAE00C3841A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92635A8F19B3CCAE00C3841A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -45,7 +48,6 @@
 		92635AE019B3E90900C3841A /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		92635AE119B3E90900C3841A /* Owner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Owner.swift; sourceTree = "<group>"; };
 		92635AE219B3E90900C3841A /* Repository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
-		92635AE919B3E96500C3841A /* Alamofire.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alamofire.swift; sourceTree = "<group>"; };
 		92635AEA19B3E96500C3841A /* AlamofireAndMagicalMapperClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlamofireAndMagicalMapperClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				924759011A460EF0009AA4E0 /* MagicalMapper.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,6 +73,7 @@
 		92635A8119B3CCAE00C3841A = {
 			isa = PBXGroup;
 			children = (
+				924759001A460EF0009AA4E0 /* MagicalMapper.framework */,
 				92635A8C19B3CCAE00C3841A /* Example */,
 				92635A9F19B3CCAE00C3841A /* ExampleTests */,
 				92635A8B19B3CCAE00C3841A /* Products */,
@@ -139,7 +143,7 @@
 		92635AE819B3E96500C3841A /* ServiceClient */ = {
 			isa = PBXGroup;
 			children = (
-				92635AE919B3E96500C3841A /* Alamofire.swift */,
+				924758FE1A460C74009AA4E0 /* Alamofire.swift */,
 				92635AEA19B3E96500C3841A /* AlamofireAndMagicalMapperClient.swift */,
 			);
 			path = ServiceClient;
@@ -194,6 +198,7 @@
 				TargetAttributes = {
 					92635A8919B3CCAE00C3841A = {
 						CreatedOnToolsVersion = 6.0;
+						DevelopmentTeam = 24FGDP9KJW;
 					};
 					92635A9B19B3CCAE00C3841A = {
 						CreatedOnToolsVersion = 6.0;
@@ -246,12 +251,12 @@
 			files = (
 				92635AE519B3E90900C3841A /* Owner.swift in Sources */,
 				92635AE619B3E90900C3841A /* Repository.swift in Sources */,
+				924758FF1A460C74009AA4E0 /* Alamofire.swift in Sources */,
 				92635A9219B3CCAE00C3841A /* ViewController.swift in Sources */,
 				92635AE319B3E90900C3841A /* CoreDataManager.swift in Sources */,
 				92635AE419B3E90900C3841A /* Model.xcdatamodeld in Sources */,
 				92635AEC19B3E96500C3841A /* AlamofireAndMagicalMapperClient.swift in Sources */,
 				92635A9019B3CCAE00C3841A /* AppDelegate.swift in Sources */,
-				92635AEB19B3E96500C3841A /* Alamofire.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +375,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/aryan/Desktop/MagicalMapper,
@@ -377,6 +383,7 @@
 					"/Users/aryan/Desktop/MagicalMapper/MagicalMapper/build/Debug-iphoneos",
 				);
 				INFOPLIST_FILE = Example/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Example/Example-Bridging-Header.h";
@@ -390,6 +397,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/aryan/Desktop/MagicalMapper,
@@ -397,6 +405,7 @@
 					"/Users/aryan/Desktop/MagicalMapper/MagicalMapper/build/Debug-iphoneos",
 				);
 				INFOPLIST_FILE = Example/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Example/Example-Bridging-Header.h";

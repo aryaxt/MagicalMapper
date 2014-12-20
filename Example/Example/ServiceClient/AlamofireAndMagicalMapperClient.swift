@@ -16,6 +16,7 @@ public class AlamofireAndMagicalMapperClient {
         struct Static {
             static let instance : AlamofireAndMagicalMapperClient = AlamofireAndMagicalMapperClient()
         }
+        
         return Static.instance
     }
     
@@ -33,13 +34,18 @@ public class AlamofireAndMagicalMapperClient {
      */
     public func fetchObjects <T: NSManagedObject>(method: Method, url: String, type: T.Type, completion: (results: [T]?, error: NSError?) -> ()) -> Request {
         
-        return Alamofire.request(method, URL: url, parameters: nil, encoding: ParameterEncoding.JSON)
-            .responseJSON {(request, response, JSON, error) in
+        return Manager.sharedInstance
+            .request(method, url, parameters: nil, encoding: .JSON)
+            .responseJSON { request, response, JSON, error in
                 
                 if let anError = error {
                     completion(results: nil, error: nil)
                 }
                 else {
+                    if JSON == nil || JSON!.count == 0 {
+                        completion(results: [], error: nil)
+                    }
+                    
                     var managedObjects = self.mapper.mapDictionaries(JSON as [[String: AnyObject]], toType: type)
                     completion(results: managedObjects, error: nil)
                 }
@@ -52,13 +58,18 @@ public class AlamofireAndMagicalMapperClient {
      */
     public func fetchObject <T: NSManagedObject>(method: Method, url: String, type: T.Type, completion: (results: T?, error: NSError?) -> ()) -> Request {
         
-        return Alamofire.request(method, URL: url, parameters: nil, encoding: ParameterEncoding.JSON)
+        return Manager.sharedInstance
+            .request(method, url, parameters: nil, encoding: ParameterEncoding.JSON)
             .responseJSON {(request, response, JSON, error) in
                 
                 if let anError = error {
                     completion(results: nil, error: nil)
                 }
                 else {
+                    if JSON == nil {
+                        completion(results: nil, error: nil)
+                    }
+                    
                     var managedObject = self.mapper.mapDictionary(JSON as [String: AnyObject], toType: type)
                     completion(results: managedObject, error: nil)
                 }

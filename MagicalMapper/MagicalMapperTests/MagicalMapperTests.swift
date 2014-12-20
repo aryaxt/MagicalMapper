@@ -46,6 +46,7 @@ class MapperTests: XCTestCase {
     override func setUp() {
         CoreDataManager.sharedInstance.reset()
         mapper = MagicalMapper(managedObjectContext: CoreDataManager.sharedInstance.managedObjectContext!)
+        mapper?.logger.logLevel = .Error
         super.setUp()
     }
     
@@ -145,10 +146,10 @@ class MapperTests: XCTestCase {
         XCTAssert(user.posts.count == 2, "Pass")
         var post1 = user.posts.allObjects[0] as NSManagedObject
         var post2 = user.posts.allObjects[1] as NSManagedObject
-        XCTAssert(post1.valueForKey("id").intValue == 1, "Pass")
-        XCTAssert(post2.valueForKey("id").intValue == 2, "Pass")
-        XCTAssert(post1.valueForKey("title") as String == postTitle, "Pass")
-        XCTAssert(post1.valueForKey("body") as String == postBody, "Pass")
+        XCTAssert(post1.valueForKey("id")!.intValue == 1, "Pass")
+        XCTAssert(post2.valueForKey("id")!.intValue == 2, "Pass")
+        XCTAssert(post1.valueForKey("title")! as String == postTitle, "Pass")
+        XCTAssert(post1.valueForKey("body")! as String == postBody, "Pass")
     }
     
     func testShouldMapOneToManyRelationshipWithCustomMapping() {
@@ -180,6 +181,18 @@ class MapperTests: XCTestCase {
         
         XCTAssert(newUser.objectID == user.objectID, "Pass")
         XCTAssert(newUser.firstName == newName, "Pass")
+    }
+    
+    func testShouldUpdateExistingManagedObjectBasedOnUniqueIdentifierWhichIsADate() {
+        var userDict = [String : AnyObject]()
+        userDict["createdAt"] = createdAt
+        
+        var user = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        mapper!.addUniqueIdentifiersForEntity(User.self, identifiers: "createdAt")
+        var newUser = mapper!.mapDictionary(userDict, toType: User.self)
+        
+        XCTAssert(newUser.objectID == user.objectID, "Pass")
     }
     
     func testShouldNotUpdateExistingManagedObjectWhenUniqueIdentifiersAreDifferent() {
@@ -284,6 +297,7 @@ class MapperTests: XCTestCase {
         userDict["posts"] = postDicts
         
         var addressDict = [String : AnyObject]()
+        addressDict["id"] = 1
         addressDict["cit"] = city
         addressDict["countr"] = country
         userDict["address"] = addressDict
@@ -291,16 +305,19 @@ class MapperTests: XCTestCase {
         var userDicts = [[String: AnyObject]]()
         
         for i in 1...100 {
+            userDict["id"] = i
             userDicts.append(userDict)
         }
         
         mapper![User.self] = [
+            "id"            : "id",
             "fName"         : "firstName",
             "lName"         : "lastName",
             "someDate"      : "createdAt",
             "How_Old-I*Am"  : "age"]
         
         mapper![Address.self] = [
+            "id"            : "id",
             "cit"           : "city",
             "countr"        : "countrty"]
         

@@ -1,6 +1,10 @@
 MagicalMapper
 =============
 
+I started this library hoping that Swift would eventually support reflectio wehich would lead to some really cool features, but that hasn't happened yet.
+
+Until then you can use the objective c version I've written that supports both NSObjects and NSManagedObjects https://github.com/aryaxt/OCMapper
+
 MagicalMapper is a mapping library that takes a dictionary of key/values and maps them to Core Data managed objects.
 
 
